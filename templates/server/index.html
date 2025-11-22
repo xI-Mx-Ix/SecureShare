@@ -33,9 +33,18 @@
 
     <!-- Header -->
     <header class="flex justify-between items-center mb-8">
-        <h2 class="text-2xl font-bold">Server Control</h2>
-        <div id="status-indicator" class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-            <i class="fas fa-circle text-[8px] mr-2"></i>Active
+        <div class="flex items-center gap-4">
+            <h2 class="text-2xl font-bold">Server Control</h2>
+            <div id="status-indicator" class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                <i class="fas fa-circle text-[8px] mr-2"></i>Active
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div>
+            <button onclick="showLogoutConfirm()" class="flex items-center gap-2 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 rounded-lg text-xs font-semibold transition">
+                <i class="fas fa-power-off"></i> Logout All Clients
+            </button>
         </div>
     </header>
 
@@ -47,18 +56,16 @@
             <h3 class="text-lg font-semibold mb-4 flex items-center gap-2"><i class="fas fa-cogs text-slate-400"></i> Configuration</h3>
 
             <div class="space-y-4">
-                <!-- Folder Path Input with Browse Button -->
+                <!-- Folder Path Input -->
                 <div>
                     <label class="block text-xs uppercase text-slate-500 font-bold mb-1">Shared Folder Path</label>
                     <div class="flex gap-2">
                         <input type="text" id="folderPath" class="flex-1 bg-slate-950 border border-slate-700 rounded px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none transition" value="{{ config.folder_path }}">
 
-                        <!-- Browse Button -->
                         <button onclick="openFilePicker()" class="bg-slate-800 hover:bg-slate-700 px-3 py-2 rounded border border-slate-700 transition group" title="Browse Folder">
                             <i class="fas fa-folder-open text-amber-500 group-hover:text-amber-400"></i>
                         </button>
 
-                        <!-- Save Button -->
                         <button onclick="updateConfig('folder')" class="bg-slate-800 hover:bg-slate-700 px-3 py-2 rounded border border-slate-700 transition group" title="Save Path">
                             <i class="fas fa-save text-slate-400 group-hover:text-white"></i>
                         </button>
@@ -83,7 +90,6 @@
             <h3 class="text-lg font-semibold mb-4 flex items-center gap-2"><i class="fas fa-toggle-on text-slate-400"></i> Live State</h3>
 
             <div class="space-y-4">
-                <!-- Master Switch -->
                 <div class="flex justify-between items-center p-3 bg-slate-950 rounded-lg border border-slate-800">
                     <div>
                         <div class="font-medium text-sm text-white">Server Online</div>
@@ -95,7 +101,6 @@
                     </label>
                 </div>
 
-                <!-- Pause Switch -->
                 <div class="flex justify-between items-center p-3 bg-slate-950 rounded-lg border border-slate-800">
                     <div>
                         <div class="font-medium text-sm text-white">Pause Access</div>
@@ -107,7 +112,6 @@
                     </label>
                 </div>
 
-                <!-- Approval Switch -->
                 <div class="flex justify-between items-center p-3 bg-slate-950 rounded-lg border border-slate-800">
                     <div>
                         <div class="font-medium text-sm text-white">Require Approval</div>
@@ -134,19 +138,43 @@
                 <thead class="text-xs text-slate-500 uppercase bg-slate-950/50">
                 <tr>
                     <th class="px-4 py-3">Time</th>
+                    <!-- This header now correctly reflects Request ID -->
+                    <th class="px-4 py-3">Request ID</th>
                     <th class="px-4 py-3">File</th>
                     <th class="px-4 py-3">Action</th>
                 </tr>
                 </thead>
                 <tbody id="requestsTable" class="divide-y divide-slate-800">
                 <!-- Populated by JS -->
-                <tr class="text-center py-4"><td colspan="3" class="py-4">No pending requests</td></tr>
+                <tr class="text-center py-4"><td colspan="4" class="py-4">No pending requests</td></tr>
                 </tbody>
             </table>
         </div>
     </div>
 
 </main>
+
+<!-- CUSTOM LOGOUT CONFIRMATION MODAL -->
+<div id="logoutConfirmModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+    <div class="bg-slate-900 border border-slate-700 p-8 rounded-2xl max-w-sm w-full text-center shadow-2xl transform scale-95 transition-transform duration-300" id="logoutConfirmContent">
+
+        <div class="w-16 h-16 mx-auto bg-red-500/10 text-red-500 rounded-full flex items-center justify-center mb-4 border border-red-500/20">
+            <i class="fas fa-exclamation-triangle text-2xl"></i>
+        </div>
+
+        <h3 class="text-lg font-bold text-white mb-2">Logout All Clients?</h3>
+        <p class="text-slate-400 text-sm mb-6">This will immediately disconnect all active users. They will need to log in again.</p>
+
+        <div class="flex gap-3 justify-center">
+            <button onclick="closeLogoutConfirm()" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium transition">
+                Cancel
+            </button>
+            <button onclick="performLogoutAll()" class="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white text-sm font-bold shadow-lg shadow-red-600/20 transition">
+                Yes, Logout All
+            </button>
+        </div>
+    </div>
+</div>
 
 <!-- NOTIFICATION TOAST -->
 <div id="notificationToast" class="fixed bottom-6 right-6 px-6 py-4 rounded-xl bg-slate-900 border border-emerald-500/30 shadow-2xl shadow-emerald-500/10 transform translate-y-20 opacity-0 transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1) flex items-center gap-4 z-50">

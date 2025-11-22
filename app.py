@@ -18,7 +18,8 @@ SERVER_CONFIG = {
     "password": "admin",         # Default access password
     "is_running": True,          # Controls client login ability
     "is_paused": False,          # Controls visibility of client content
-    "require_approval": False    # Controls if admin must approve downloads
+    "require_approval": False,   # Controls if admin must approve downloads
+    "session_token": str(uuid.uuid4()) # Unique token to validate active sessions
 }
 
 # In-memory storage for download requests
@@ -28,11 +29,12 @@ DOWNLOAD_REQUESTS = {}
 def login_required(f):
     """
     Decorator to ensure the client is authenticated via session.
-    Redirects to login page if session is missing.
+    Validates the session token against the server's current token.
     """
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if not session.get('logged_in'):
+        if not session.get('logged_in') or session.get('token') != SERVER_CONFIG['session_token']:
+            session.clear()
             return redirect(url_for('client_login'))
         return f(*args, **kwargs)
     return decorated_function
@@ -46,7 +48,6 @@ def login_required(f):
 def admin_dashboard():
     """
     Renders the main Admin Dashboard template.
-    Passes the current server configuration context.
     """
     return render_template('server/index.html', config=SERVER_CONFIG)
 
@@ -55,16 +56,14 @@ def admin_dashboard():
 def admin_api_status():
     """
     API Endpoint for Server Status.
-
-    GET: Retrieves current configuration, active user count, and pending requests.
-    POST: Updates configuration settings (password, folder path, toggles).
+    GET: Returns config and stats.
+    POST: Updates config.
     """
     if request.method == 'POST':
         data = request.json
         if 'password' in data:
             SERVER_CONFIG['password'] = data['password']
         if 'folder_path' in data:
-            # Validate path existence before updating
             if os.path.exists(data['folder_path']):
                 SERVER_CONFIG['folder_path'] = data['folder_path']
         if 'is_running' in data:
@@ -76,7 +75,6 @@ def admin_api_status():
 
         return jsonify({"status": "updated"})
 
-    # Return current state
     return jsonify({
         "config": SERVER_CONFIG,
         "active_users": 1 if session.get('logged_in') else 0,
@@ -87,28 +85,32 @@ def admin_api_status():
 @app.route('/admin/api/browse', methods=['GET'])
 def admin_api_browse():
     """
-    Opens a server-side OS dialog to select a folder.
-    Uses tkinter (headless) to spawn the directory chooser.
-    Returns the selected path to the frontend.
+    Opens a server-side OS dialog to select a folder using tkinter.
     """
     try:
-        # Create a hidden root window for tkinter
         root = tk.Tk()
-        root.withdraw()  # Hide the main window
-        root.attributes('-topmost', True)  # Bring dialog to front
-
-        # Open Directory Picker
+        root.withdraw()
+        root.attributes('-topmost', True)
         path = filedialog.askdirectory(initialdir=SERVER_CONFIG['folder_path'], title="Select Shared Folder")
-
-        root.destroy()  # Cleanup
+        root.destroy()
 
         if path:
             return jsonify({"path": path})
         else:
-            return jsonify({"path": None})  # User cancelled
+            return jsonify({"path": None})
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+@app.route('/admin/api/logout_all', methods=['POST'])
+def admin_api_logout_all():
+    """
+    Regenerates the global session token.
+    This action invalidates all existing client sessions immediately.
+    """
+    SERVER_CONFIG['session_token'] = str(uuid.uuid4())
+    return jsonify({"success": True, "message": "All clients have been logged out."})
 
 
 @app.route('/admin/api/requests')
@@ -124,7 +126,6 @@ def admin_api_requests():
 def admin_api_decision():
     """
     API Endpoint to process Admin decisions on downloads.
-    Accepts JSON: { req_id: string, decision: 'approved'|'rejected' }
     """
     data = request.json
     req_id = data.get('req_id')
@@ -151,8 +152,12 @@ def index():
 def client_login():
     """
     Handles Client Authentication.
-    Checks if the server is 'running' before allowing login.
+    Checks for forced logout flags to display feedback messages.
     """
+    # Handle feedback from forced logout redirection
+    if request.args.get('reason') == 'logout':
+        flash('You have been logged out by the administrator.')
+
     if not SERVER_CONFIG["is_running"]:
         return render_template('client/login.html', error="Server is currently offline.")
 
@@ -160,6 +165,7 @@ def client_login():
         password_input = request.form.get('password')
         if password_input == SERVER_CONFIG["password"]:
             session['logged_in'] = True
+            session['token'] = SERVER_CONFIG['session_token']
             return redirect(url_for('client_files'))
         else:
             flash('Invalid Password')
@@ -179,18 +185,11 @@ def client_logout():
 def client_files():
     """
     Renders the File Browser.
-    Handles directory navigation and lists files/folders.
     """
-    # Force logout if server is stopped
-    if not SERVER_CONFIG["is_running"]:
-        session.clear()
-        return redirect(url_for('client_login'))
-
     root = SERVER_CONFIG["folder_path"]
     req_path = request.args.get('path', '')
     abs_path = os.path.join(root, req_path)
 
-    # Security: Prevent Path Traversal
     try:
         if os.path.commonpath([root, abs_path]) != os.path.normpath(root):
             return "Invalid Path", 403
@@ -211,7 +210,6 @@ def client_files():
             if os.path.isdir(full):
                 folders_list.append({'name': item, 'path': rel})
             else:
-                # Calculate size in MB
                 size = round(os.path.getsize(full) / (1024 * 1024), 2)
                 files_list.append({'name': item, 'size': size, 'path': rel})
     except Exception as e:
@@ -233,11 +231,20 @@ def client_files():
 @app.route('/api/client/status')
 def client_status():
     """
-    API used by client.js to poll for 'Pause' or 'Offline' status.
+    API used by client.js to poll status.
+    Returns 'force_logout' = True if the session token is invalid/expired.
     """
+    # Check if the token in the user's cookie matches the current server token
+    token_valid = session.get('token') == SERVER_CONFIG['session_token']
+    is_logged_in = session.get('logged_in')
+
+    # If logged in but token is wrong, they were kicked
+    force_logout = is_logged_in and not token_valid
+
     return jsonify({
         "paused": SERVER_CONFIG["is_paused"],
-        "running": SERVER_CONFIG["is_running"]
+        "running": SERVER_CONFIG["is_running"],
+        "force_logout": force_logout
     })
 
 
@@ -246,6 +253,7 @@ def client_status():
 def request_download():
     """
     Initiates a download request.
+    Returns the Request ID (req_id) which acts as the transaction identifier.
     """
     filename = request.json.get('filename')
     full_path = os.path.join(SERVER_CONFIG["folder_path"], filename)
@@ -259,7 +267,6 @@ def request_download():
             "direct_link": url_for('download_content', filename=filename)
         })
 
-    # Generate request ID
     req_id = str(uuid.uuid4())
     DOWNLOAD_REQUESTS[req_id] = {
         'file': filename,
@@ -273,7 +280,7 @@ def request_download():
 @login_required
 def check_request(req_id):
     """
-    Polled by client.js to check the status of a specific download request.
+    Polled by client.js to check approval status.
     """
     if req_id not in DOWNLOAD_REQUESTS:
         return jsonify({"status": "error"})
@@ -291,7 +298,7 @@ def check_request(req_id):
 @login_required
 def download_content():
     """
-    Serves the actual file.
+    Serves the actual file if valid.
     """
     filename = request.args.get('filename')
     token = request.args.get('token')
