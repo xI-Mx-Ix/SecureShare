@@ -63,9 +63,9 @@ function checkStatus() {
                 return;
             }
 
-            // Reload if server goes offline
+            // Redirect to logout if the server is offline
             if (!data.running) {
-                window.location.reload();
+                window.location.href = '/logout';
                 return;
             }
 

@@ -31,10 +31,13 @@ def login_required(f):
     """
     Decorator to ensure the client is authenticated via session.
     Validates the session token against the server's current token.
+    Additionally checks if the server is currently in the 'running' state.
+    If the server is offline or the token is invalid, the session is cleared.
     """
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if not session.get('logged_in') or session.get('token') != SERVER_CONFIG['session_token']:
+        # Check if server is stopped OR if session/token is invalid
+        if not SERVER_CONFIG['is_running'] or not session.get('logged_in') or session.get('token') != SERVER_CONFIG['session_token']:
             session.clear()
             return redirect(url_for('client_login'))
         return f(*args, **kwargs)
