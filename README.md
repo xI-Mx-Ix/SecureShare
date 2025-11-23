@@ -41,15 +41,16 @@ The Admin Panel will open automatically in your browser.
 ## How to use
 
 ### 👮 For You (The Admin)
-*   **Dashboard:** Go to `http://localhost:55322/admin`.
-*   **Pick a Folder:** Use the browse button to select what you want to share.
-*   **Set a Password:** Keep strangers out.
-*   **Control:** Use the toggle switches to go Offline, Pause the UI, or enable Approval Mode.
+* **Dashboard:** Go to the URL shown in your terminal (`http://localhost:XXXXX/admin`). The port is random each time you start the server.
+* **Pick a Folder:** Use the browse button to select what you want to share.
+* **Set a Password:** Keep strangers out.
+* **Control:** Use the toggle switches to go Offline, Pause the UI, or enable Approval Mode.
+* **Port Access:** If your friends connect from outside your network, **you need to set up port forwarding** on your router or use a **tunnel (like ngrok)** so they can reach your server.
 
 ### 👤 For Your Friends (The Clients)
-*   Send them your local IP address (e.g., `http://192.168.1.5:5000`).
-*   They log in with the password you set.
-*   They browse and download. If you enabled approvals, they'll see a "Waiting for Approval" status while you decide their fate.
+* Connect using your public IP and port (e.g., `http://YOUR_PUBLIC_IP:XXXXX`).
+* Log in with the password you set.
+* Browse and download. If you enabled approvals, you'll see a "Waiting for Approval" status while the admin decides.
 
 ---
 
