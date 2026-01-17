@@ -6,6 +6,10 @@ from client_routes import client_app
 from admin_routes import admin_app
 
 def open_browser():
+    """
+    Waits for the server to initialize, then opens the Admin Panel
+    in the system's default web browser.
+    """
     time.sleep(1.5)
     admin_url = f"http://127.0.0.1:{ADMIN_PORT}/admin"
     print(f"\n[INFO] Admin Panel: {admin_url}")
@@ -13,18 +17,20 @@ def open_browser():
     webbrowser.open(admin_url)
 
 def run_client():
+    """Runs the Client Flask application on port 5000 (accessible externally)."""
     client_app.run(host='0.0.0.0', port=5000, debug=False, use_reloader=False)
 
 def run_admin():
+    """Runs the Admin Flask application on the randomly assigned local port."""
     admin_app.run(host='127.0.0.1', port=ADMIN_PORT, debug=False, use_reloader=False)
 
 if __name__ == "__main__":
-    # Browser launcher thread
+    # Start the browser launcher in a background thread
     threading.Thread(target=open_browser, daemon=True).start()
 
-    # Client server thread
+    # Start the client server in a background thread so it runs concurrently
     client_thread = threading.Thread(target=run_client, daemon=True)
     client_thread.start()
 
-    # Admin server (mainthread)
+    # Run the admin server on the main thread
     run_admin()

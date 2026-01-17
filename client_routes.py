@@ -5,15 +5,23 @@ from flask import Flask, render_template, request, redirect, url_for, session, s
 from config import SERVER_CONFIG, DOWNLOAD_REQUESTS, TEMPLATE_DIR, STATIC_DIR
 from utils import login_required, format_file_size
 
+# Initialize Flask app for the Client Interface
 client_app = Flask(__name__, template_folder=TEMPLATE_DIR, static_folder=STATIC_DIR)
 client_app.secret_key = os.urandom(24)
 
 @client_app.route('/')
 def index():
+    """Redirects root to the login page."""
     return redirect(url_for('client_login'))
 
 @client_app.route('/login', methods=['GET', 'POST'])
 def client_login():
+    """
+    Handles client authentication.
+
+    GET: Displays login form. Shows error if server is offline.
+    POST: Validates password against server config. Sets session token on success.
+    """
     if request.args.get('reason') == 'logout':
         flash('You have been logged out by the administrator.')
 
@@ -32,17 +40,25 @@ def client_login():
 
 @client_app.route('/logout')
 def client_logout():
+    """Clears the session and redirects to login."""
     session.clear()
     return redirect(url_for('client_login'))
 
 @client_app.route('/files')
 @login_required
 def client_files():
+    """
+    Lists files and directories for the requested path.
+
+    Performs security checks to prevent path traversal (ensuring path is within root).
+    Renders the file browser interface.
+    """
     root = SERVER_CONFIG["folder_path"]
     req_path = request.args.get('path', '')
     abs_path = os.path.join(root, req_path)
 
     try:
+        # Security check: Ensure the resolved path is inside the root folder
         if os.path.commonpath([root, abs_path]) != os.path.normpath(root):
             return "Invalid Path", 403
     except Exception:
@@ -60,21 +76,25 @@ def client_files():
                 folders_list.append({'name': item, 'path': rel})
             else:
                 files_list.append({
-                    'name': item, 
-                    'size': format_file_size(os.path.getsize(full)), 
+                    'name': item,
+                    'size': format_file_size(os.path.getsize(full)),
                     'path': rel
                 })
     except Exception as e:
         return f"Error: {e}", 500
 
-    return render_template('client/files.html', 
-                           files=files_list, 
-                           folders=folders_list, 
-                           current_path=req_path, 
+    return render_template('client/files.html',
+                           files=files_list,
+                           folders=folders_list,
+                           current_path=req_path,
                            parent=os.path.dirname(req_path) if req_path else None)
 
 @client_app.route('/api/client/status')
 def client_status():
+    """
+    Returns the current server status to the client frontend (polling).
+    Checks for server pause state, running state, and forced logouts (invalid token).
+    """
     token_valid = session.get('token') == SERVER_CONFIG['session_token']
     force_logout = session.get('logged_in') and not token_valid
     return jsonify({
@@ -87,6 +107,12 @@ def client_status():
 @client_app.route('/api/client/request_download', methods=['POST'])
 @login_required
 def request_download():
+    """
+    Initiates a download request.
+
+    If approval is not required: returns a direct download link.
+    If approval is required: creates a pending request ID and returns it for polling.
+    """
     data = request.json
     filename, rel_path = data.get('filename'), data.get('path', data.get('filename'))
     full_path = os.path.join(SERVER_CONFIG["folder_path"], rel_path)
@@ -111,6 +137,10 @@ def request_download():
 @client_app.route('/api/client/check_request/<req_id>')
 @login_required
 def check_request(req_id):
+    """
+    Polls the status of a specific download request.
+    If approved, generates the download link with the request token.
+    """
     if req_id not in DOWNLOAD_REQUESTS:
         return jsonify({"status": "error"})
     req = DOWNLOAD_REQUESTS[req_id]
@@ -122,6 +152,13 @@ def check_request(req_id):
 @client_app.route('/download_final')
 @login_required
 def download_content():
+    """
+    Serves the actual file content.
+
+    Validates:
+    1. Server pause state.
+    2. Approval token (if approval is required).
+    """
     filepath, token = request.args.get('filepath'), request.args.get('token')
     if SERVER_CONFIG["is_paused"]: return "Server Paused", 403
 
