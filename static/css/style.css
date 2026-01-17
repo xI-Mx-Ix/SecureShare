@@ -19,6 +19,30 @@ body {
 ::-webkit-scrollbar-thumb:hover {
     background: #475569;
 }
+/* Custom Range Slider Styling */
+#audioProgress {
+    -webkit-appearance: none;
+    background: #1e293b;
+}
+
+#audioProgress::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 12px;
+    width: 12px;
+    border-radius: 50%;
+    background: #06b6d4;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
+}
+
+#audioProgress::-moz-range-thumb {
+    height: 12px;
+    width: 12px;
+    border: none;
+    border-radius: 50%;
+    background: #06b6d4;
+    cursor: pointer;
+}
 
 /* Blur Utility */
 .blur-sm {
