@@ -12,7 +12,7 @@
 </head>
 <body class="bg-slate-950 text-slate-200 font-sans selection:bg-cyan-500/30 min-h-screen flex flex-col">
 
-<!-- CONTENT WRAPPER -->
+<!-- Main Wrapper -->
 <div id="main-content" class="flex-1 flex flex-col transition-all duration-500">
 
     <!-- Navbar -->
@@ -23,35 +23,29 @@
                     <i class="fas fa-shield-alt text-sm"></i>
                 </div>
                 <div>
-                    <h1 class="font-bold text-slate-100 leading-none">Secure Share</h1>
+                    <h1 class="font-bold text-slate-100 leading-none tracking-tight">Secure Share</h1>
                     <div class="text-[10px] text-slate-500 font-mono mt-1">/{{ current_path }}</div>
                 </div>
             </div>
 
             <div class="flex items-center gap-4">
-                <!-- View Toggle Button -->
-                <button onclick="toggleView()" class="p-2 text-slate-400 hover:text-white transition rounded-full hover:bg-white/5" title="Toggle View">
+                <button onclick="toggleView()" class="p-2 text-slate-400 hover:text-white transition rounded-full hover:bg-white/5 active:scale-95" title="Toggle View">
                     <i id="viewIcon" class="fas fa-list-ul"></i>
                 </button>
-
-                <a href="/logout" class="text-xs font-semibold text-red-400 hover:text-red-300 border border-red-500/20 bg-red-500/10 px-3 py-1.5 rounded-full transition hover:bg-red-500/20">
+                <a href="/logout" class="text-xs font-semibold text-red-400 hover:text-red-300 border border-red-500/20 bg-red-500/10 px-3 py-1.5 rounded-full transition hover:bg-red-500/20 hover:shadow-[0_0_10px_rgba(239,68,68,0.2)]">
                     Logout
                 </a>
             </div>
         </div>
     </nav>
 
-    <!-- File Area -->
+    <!-- Content Area -->
     <main class="flex-1 container mx-auto px-4 py-8 max-w-7xl">
-
-        <!-- Grid/List Container -->
-        <!-- The initial class list defines the Grid View layout. JS toggles this. -->
         <div id="fileContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
 
-            <!-- Back Button -->
-            <!-- Note: Includes specific classes like inner-wrapper to be compatible with JS toggle logic -->
+            <!-- Back Directory Button -->
             {% if parent is not none %}
-            <a href="{{ url_for('client_files', path=parent) }}" class="file-card group bg-slate-900/40 border border-white/5 hover:border-slate-600 rounded-xl p-4 flex flex-col items-center justify-center min-h-[180px] transition-all">
+            <a href="{{ url_for('client_files', path=parent) }}" class="file-card group bg-slate-900/40 border border-white/5 hover:border-slate-600 rounded-xl p-4 flex flex-col items-center justify-center min-h-[180px] transition-all hover:bg-slate-800/50">
                 <div class="inner-wrapper flex flex-col items-center justify-center w-full h-full">
                     <div class="icon-wrapper w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-500 group-hover:text-slate-300 mb-2 transition-colors">
                         <i class="fas fa-level-up-alt"></i>
@@ -61,24 +55,18 @@
             </a>
             {% endif %}
 
-            <!-- Folders Loop -->
+            <!-- Folder Items -->
             {% for folder in folders %}
-            <a href="{{ url_for('client_files', path=folder.path) }}" class="file-card group bg-slate-900/40 border border-white/5 hover:border-amber-500/30 hover:bg-slate-900/80 rounded-xl p-4 flex flex-col justify-between min-h-[180px] relative overflow-hidden transition-all duration-300">
-
-                <!-- Background Decoration (Hidden in List View) -->
+            <a href="{{ url_for('client_files', path=folder.path) }}" class="file-card group bg-slate-900/40 border border-white/5 hover:border-amber-500/30 hover:bg-slate-900/80 rounded-xl p-4 flex flex-col justify-between min-h-[180px] relative overflow-hidden transition-all duration-300 hover:shadow-[0_0_20px_rgba(245,158,11,0.1)]">
+                <!-- Background Icon -->
                 <div class="bg-icon absolute top-0 right-0 p-2 text-amber-500/5 group-hover:text-amber-500/10 transition duration-500 pointer-events-none">
                     <i class="fas fa-folder text-8xl"></i>
                 </div>
-
-                <!-- Inner Content Wrapper (Targeted by JS) -->
+                <!-- Content -->
                 <div class="inner-wrapper relative z-10 flex flex-col h-full w-full">
-
-                    <!-- Icon -->
                     <div class="icon-wrapper w-12 h-12 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center mb-3 border border-amber-500/10 shadow-lg shadow-amber-900/20 group-hover:scale-110 transition-transform flex-shrink-0">
                         <i class="fas fa-folder"></i>
                     </div>
-
-                    <!-- Text Info -->
                     <div class="text-content">
                         <h3 class="font-medium text-slate-200 truncate group-hover:text-amber-400 transition-colors">{{ folder.name }}</h3>
                         <p class="text-xs text-slate-500 mt-1">Directory</p>
@@ -87,57 +75,120 @@
             </a>
             {% endfor %}
 
-            <!-- Files Loop -->
+            <!-- File Items -->
             {% for file in files %}
-            <div class="file-card group bg-slate-900/40 border border-white/5 hover:border-cyan-500/30 hover:bg-slate-900/80 rounded-xl p-4 flex flex-col justify-between min-h-[180px] relative overflow-hidden transition-all duration-300">
+            <div class="file-card group bg-slate-900/40 border border-white/5 hover:border-cyan-500/30 hover:bg-slate-900/80 rounded-xl p-4 flex flex-col justify-between min-h-[180px] relative overflow-visible transition-all duration-300 hover:shadow-[0_0_20px_rgba(6,182,212,0.1)]">
 
-                <!-- Background Decoration -->
-                <div class="bg-icon absolute top-0 right-0 p-2 text-cyan-500/5 group-hover:text-cyan-500/10 transition duration-500 pointer-events-none">
-                    <i class="fas fa-file text-8xl"></i>
+                <!-- Background Icon -->
+                <div class="bg-icon absolute top-0 right-0 p-2 text-cyan-500/5 group-hover:text-cyan-500/10 transition duration-500 pointer-events-none overflow-hidden rounded-xl">
+                    {% if file.category == 'image' %}<i class="fas fa-image text-8xl"></i>
+                    {% elif file.category == 'video' %}<i class="fas fa-video text-8xl"></i>
+                    {% elif file.category == 'audio' %}<i class="fas fa-music text-8xl"></i>
+                    {% else %}<i class="fas fa-file text-8xl"></i>{% endif %}
                 </div>
 
-                <!-- Inner Content Wrapper -->
+                <!-- Inner Content -->
                 <div class="inner-wrapper relative z-10 flex flex-col h-full w-full">
 
-                    <!-- Icon -->
+                    <!-- Icon Type -->
                     <div class="icon-wrapper w-12 h-12 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center mb-3 border border-cyan-500/10 shadow-lg shadow-cyan-900/20 group-hover:scale-110 transition-transform flex-shrink-0">
-                        <i class="fas fa-file-alt"></i>
+                        {% if file.category == 'image' %}<i class="fas fa-image"></i>
+                        {% elif file.category == 'video' %}<i class="fas fa-video"></i>
+                        {% elif file.category == 'audio' %}<i class="fas fa-music"></i>
+                        {% elif file.category == 'text' %}<i class="fas fa-file-code"></i>
+                        {% else %}<i class="fas fa-file-alt"></i>{% endif %}
                     </div>
 
-                    <!-- Text Info -->
+                    <!-- File Info -->
                     <div class="text-content min-w-0">
                         <h3 class="font-medium text-slate-200 break-all line-clamp-2 group-hover:text-cyan-300 transition-colors" title="{{ file.name }}">{{ file.name }}</h3>
                         <p class="text-xs text-slate-500 mt-1 font-mono">{{ file.size }}</p>
                     </div>
 
-                    <!-- Action Button Wrapper -->
-                    <div class="action-btn-wrapper mt-auto w-full pt-4">
-                        <button onclick="initiateDownload('{{ file.name }}', '{{ file.path }}')" class="action-btn w-full py-2.5 rounded-lg bg-slate-800 hover:bg-cyan-600 text-slate-300 hover:text-white text-xs font-bold uppercase tracking-wide transition-all border border-white/5 shadow-lg group-hover:shadow-cyan-500/20 whitespace-nowrap">
-                            <span class="flex items-center justify-center gap-2">
-                                <i class="fas fa-download"></i> <span class="btn-text">Download</span>
-                            </span>
+                    <!-- Action Buttons -->
+                    <div class="action-btn-wrapper mt-auto w-full pt-4 flex gap-2">
+
+                        <!-- PREVIEW BUTTON with Tooltip Structure -->
+                        <!-- The JS will dynamically add classes 'opacity-50', 'cursor-not-allowed', 'group/btn' etc based on status -->
+                        {% if file.category != 'unknown' %}
+                        <div class="preview-btn-container relative flex-1 hidden"> <!-- Container handles tooltip positioning -->
+                            <button onclick="openPreview('{{ file.name }}', '{{ file.path }}', '{{ file.category }}')"
+                                    class="preview-btn w-full h-full py-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-bold transition border border-white/5 shadow-lg flex items-center justify-center gap-2 group/btn">
+                                <i class="fas fa-eye"></i> <span class="btn-text hidden sm:inline">View</span>
+                            </button>
+
+                            <!-- Tooltip (Only shows if button is disabled via JS logic) -->
+                            <div class="tooltip-content absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-slate-900 text-slate-300 text-[10px] rounded border border-slate-700 opacity-0 pointer-events-none transition-opacity whitespace-nowrap shadow-xl z-20">
+                                Approval Required
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <button onclick="initiateDownload('{{ file.name }}', '{{ file.path }}')" class="flex-1 py-2.5 rounded-lg bg-slate-800 hover:bg-cyan-600 text-slate-300 hover:text-white text-xs font-bold uppercase tracking-wide transition-all border border-white/5 shadow-lg group-hover:shadow-cyan-500/20 whitespace-nowrap flex items-center justify-center gap-2">
+                            <i class="fas fa-download"></i> <span class="btn-text">DL</span>
                         </button>
                     </div>
                 </div>
             </div>
             {% endfor %}
-
         </div>
     </main>
 </div>
 
-<!-- PAUSE OVERLAY -->
-<div id="pauseOverlay" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-500">
-    <div class="text-center max-w-md p-8">
+<!-- PREVIEW LIGHTBOX MODAL -->
+<div id="previewModal" class="fixed inset-0 z-[60] bg-black/90 backdrop-blur-md flex flex-col opacity-0 pointer-events-none transition-all duration-300 transform scale-95">
+
+    <!-- Top Bar -->
+    <div class="flex justify-between items-center p-4 border-b border-white/10 bg-black/50 backdrop-blur-sm z-10">
+        <div class="flex items-center gap-3 overflow-hidden">
+            <div class="w-8 h-8 rounded bg-blue-600/20 text-blue-400 flex items-center justify-center"><i class="fas fa-eye"></i></div>
+            <h3 id="previewTitle" class="text-white font-medium truncate max-w-lg text-sm font-mono">filename.ext</h3>
+        </div>
+        <button onclick="closePreview()" class="text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 p-2 rounded-full transition w-8 h-8 flex items-center justify-center">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <!-- Content Area -->
+    <div class="flex-1 flex items-center justify-center p-4 overflow-hidden relative">
+        <!-- Loader -->
+        <div id="previewLoader" class="absolute inset-0 flex flex-col items-center justify-center hidden z-20">
+            <div class="w-12 h-12 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+            <div class="text-cyan-500 text-xs font-bold tracking-widest uppercase">Loading Content</div>
+        </div>
+
+        <!-- Media Containers -->
+        <img id="previewImage" class="hidden max-h-full max-w-full rounded shadow-2xl object-contain">
+        <video id="previewVideo" controls class="hidden max-h-full max-w-full rounded shadow-2xl outline-none"></video>
+        <audio id="previewAudio" controls class="hidden w-full max-w-md"></audio>
+
+        <!-- Code/Text Container -->
+        <div id="previewTextContainer" class="hidden w-full h-full max-w-4xl bg-slate-900/90 border border-slate-700 rounded-lg overflow-auto p-6 shadow-2xl relative">
+            <div class="absolute top-0 right-0 p-2 bg-slate-800/80 rounded-bl-lg border-b border-l border-slate-700 text-xs text-slate-500 font-mono">Read-Only</div>
+            <pre><code id="previewText" class="text-xs sm:text-sm font-mono text-slate-300 whitespace-pre-wrap break-all"></code></pre>
+        </div>
+
+        <!-- Error State -->
+        <div id="previewError" class="hidden flex flex-col items-center text-center p-8 bg-red-500/10 rounded-2xl border border-red-500/20 max-w-sm">
+            <div class="w-12 h-12 rounded-full bg-red-500/20 text-red-500 flex items-center justify-center mb-3 text-xl"><i class="fas fa-exclamation-circle"></i></div>
+            <h4 class="text-red-400 font-bold mb-1">Preview Failed</h4>
+            <span id="previewErrorMsg" class="text-red-300/70 text-sm"></span>
+        </div>
+    </div>
+</div>
+
+<!-- Paused Overlay (Security Blur) -->
+<div id="pauseOverlay" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-xl flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-500">
+    <div class="text-center max-w-md p-8 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl">
         <div class="w-16 h-16 mx-auto bg-amber-500/20 text-amber-500 rounded-full flex items-center justify-center mb-4 animate-pulse">
             <i class="fas fa-lock text-2xl"></i>
         </div>
         <h2 class="text-2xl font-bold text-white mb-2">Access Paused</h2>
-        <p class="text-slate-400">The administrator has temporarily restricted access.</p>
+        <p class="text-slate-400">The administrator has temporarily restricted access to this secure environment.</p>
     </div>
 </div>
 
-<!-- APPROVAL MODAL -->
+<!-- Approval Request Modal -->
 <div id="approvalModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
     <div class="bg-slate-900 border border-slate-700 p-8 rounded-2xl max-w-sm w-full text-center shadow-2xl transform scale-95 transition-transform duration-300" id="approvalContent">
 
@@ -145,48 +196,43 @@
         <div id="statusWaiting">
             <div class="flex justify-center mb-6">
                 <div class="relative">
-                    <div class="w-12 h-12 rounded-full border-2 border-cyan-500/20 border-t-cyan-500 animate-spin"></div>
-                    <div class="absolute inset-0 flex items-center justify-center text-cyan-500 text-[10px] font-bold">
-                        <i class="fas fa-hourglass-half"></i>
-                    </div>
+                    <div class="w-14 h-14 rounded-full border-2 border-cyan-500/20 border-t-cyan-500 animate-spin"></div>
+                    <div class="absolute inset-0 flex items-center justify-center text-cyan-500 text-[10px] font-bold"><i class="fas fa-hourglass-half"></i></div>
                 </div>
             </div>
             <h3 class="text-lg font-bold text-white mb-2">Waiting for Approval</h3>
-            <p class="text-slate-400 text-sm mb-4 leading-relaxed">Admin approval is required for this file. Please wait...</p>
+            <p class="text-slate-400 text-sm mb-6 leading-relaxed">Administrator authorization is required to download this sensitive file.</p>
 
-            <div class="bg-slate-950 rounded-lg p-3 border border-slate-800 mb-6">
-                <div class="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-1">Request ID</div>
-                <div class="font-mono text-cyan-400 text-sm" id="reqIdDisplay">ID: ...</div>
+            <div class="bg-slate-950 rounded-lg p-3 border border-slate-800 mb-6 flex justify-between items-center">
+                <span class="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Request ID</span>
+                <span class="font-mono text-cyan-400 text-sm" id="reqIdDisplay">...</span>
             </div>
 
-            <button onclick="cancelDownload()" class="w-full py-2 rounded-lg border border-slate-700 text-slate-400 hover:text-white hover:bg-slate-800 transition text-xs font-semibold">
-                Cancel Request
-            </button>
+            <button onclick="cancelDownload()" class="w-full py-2.5 rounded-lg border border-slate-700 text-slate-400 hover:text-white hover:bg-slate-800 transition text-xs font-semibold">Cancel Request</button>
         </div>
 
         <!-- Rejected State -->
         <div id="statusRejected" class="hidden">
-            <div class="w-12 h-12 mx-auto bg-red-500/10 text-red-500 rounded-full flex items-center justify-center mb-4 border border-red-500/20">
-                <i class="fas fa-times"></i>
+            <div class="w-14 h-14 mx-auto bg-red-500/10 text-red-500 rounded-full flex items-center justify-center mb-4 border border-red-500/20 shadow-[0_0_15px_rgba(239,68,68,0.2)]">
+                <i class="fas fa-times text-xl"></i>
             </div>
             <h3 class="text-lg font-bold text-white">Request Denied</h3>
-            <p class="text-slate-400 text-sm mt-2">The admin rejected this download.</p>
-            <button onclick="closeModal()" class="mt-6 w-full py-2 bg-slate-800 rounded-lg text-sm text-white hover:bg-slate-700 border border-slate-700 transition">Close</button>
+            <p class="text-slate-400 text-sm mt-2">The administrator declined your request.</p>
+            <button onclick="closeModal()" class="mt-6 w-full py-2.5 bg-slate-800 rounded-lg text-sm text-white hover:bg-slate-700 border border-slate-700 transition">Close</button>
         </div>
 
         <!-- Approved State -->
         <div id="statusApproved" class="hidden">
-            <div class="w-12 h-12 mx-auto bg-emerald-500/10 text-emerald-500 rounded-full flex items-center justify-center mb-4 border border-emerald-500/20">
-                <i class="fas fa-check"></i>
+            <div class="w-14 h-14 mx-auto bg-emerald-500/10 text-emerald-500 rounded-full flex items-center justify-center mb-4 border border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
+                <i class="fas fa-check text-xl"></i>
             </div>
-            <h3 class="text-lg font-bold text-white">Approved!</h3>
-            <p class="text-slate-400 text-sm mt-1">Download starting...</p>
+            <h3 class="text-lg font-bold text-white">Access Granted</h3>
+            <p class="text-slate-400 text-sm mt-1">Download starting immediately...</p>
         </div>
 
     </div>
 </div>
 
-<!-- External JS -->
 <script src="{{ url_for('static', filename='js/client.js') }}"></script>
 </body>
 </html>

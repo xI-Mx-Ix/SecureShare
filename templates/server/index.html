@@ -15,70 +15,59 @@
 <!-- Sidebar -->
 <aside class="w-64 bg-slate-900 border-r border-slate-800 p-6 flex flex-col">
     <div class="flex items-center gap-3 mb-10">
-        <!-- Updated Header to match Client UI -->
         <div class="w-8 h-8 rounded bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-cyan-500/20">
             <i class="fas fa-shield-alt text-sm"></i>
         </div>
         <h1 class="font-bold text-lg tracking-tight">Secure Share</h1>
     </div>
-
     <nav class="space-y-2 flex-1">
-        <a href="#" class="block px-4 py-2 rounded-lg bg-slate-800 text-cyan-400"><i class="fas fa-tachometer-alt mr-3"></i>Dashboard</a>
+        <a href="#" class="block px-4 py-2 rounded-lg bg-slate-800 text-cyan-400 font-medium text-sm">
+            <i class="fas fa-tachometer-alt mr-3"></i>Dashboard
+        </a>
     </nav>
-
-    <!-- Footer removed as requested -->
 </aside>
 
 <!-- Main Content -->
 <main class="flex-1 p-8 overflow-y-auto relative">
 
-    <!-- Header -->
     <header class="flex justify-between items-center mb-8">
         <div class="flex items-center gap-4">
-            <h2 class="text-2xl font-bold">Server Control</h2>
+            <h2 class="text-2xl font-bold text-white tracking-tight">Server Control</h2>
             <div id="status-indicator" class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                 <i class="fas fa-circle text-[8px] mr-2"></i>Active
             </div>
         </div>
-
-        <!-- Action Buttons -->
         <div>
-            <button onclick="showLogoutConfirm()" class="flex items-center gap-2 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 rounded-lg text-xs font-semibold transition">
+            <button onclick="showLogoutConfirm()" class="flex items-center gap-2 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 rounded-lg text-xs font-semibold transition hover:shadow-lg hover:shadow-red-900/20">
                 <i class="fas fa-power-off"></i> Logout All Clients
             </button>
         </div>
     </header>
 
-    <!-- Controls Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-
-        <!-- Config Card -->
-        <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-6">
-            <h3 class="text-lg font-semibold mb-4 flex items-center gap-2"><i class="fas fa-cogs text-slate-400"></i> Configuration</h3>
-
-            <div class="space-y-4">
-                <!-- Folder Path Input -->
+        <!-- Configuration Card -->
+        <div class="bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-xl p-6 shadow-xl">
+            <h3 class="text-lg font-semibold mb-6 flex items-center gap-2 text-white">
+                <i class="fas fa-cogs text-slate-400"></i> Core Configuration
+            </h3>
+            <div class="space-y-6">
                 <div>
-                    <label class="block text-xs uppercase text-slate-500 font-bold mb-1">Shared Folder Path</label>
+                    <label class="block text-xs uppercase text-slate-500 font-bold mb-2">Shared Folder Path</label>
                     <div class="flex gap-2">
-                        <input type="text" id="folderPath" class="flex-1 bg-slate-950 border border-slate-700 rounded px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none transition" value="{{ config.folder_path }}">
-
-                        <button onclick="openFilePicker()" class="bg-slate-800 hover:bg-slate-700 px-3 py-2 rounded border border-slate-700 transition group" title="Browse Folder">
+                        <input type="text" id="folderPath" class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-300 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 transition" value="{{ config.folder_path }}">
+                        <button onclick="openFilePicker()" class="bg-slate-800 hover:bg-slate-700 px-3 py-2 rounded-lg border border-slate-700 transition group" title="Browse Folder">
                             <i class="fas fa-folder-open text-amber-500 group-hover:text-amber-400"></i>
                         </button>
-
-                        <button onclick="updateConfig('folder')" class="bg-slate-800 hover:bg-slate-700 px-3 py-2 rounded border border-slate-700 transition group" title="Save Path">
+                        <button onclick="updateConfig('folder')" class="bg-slate-800 hover:bg-slate-700 px-3 py-2 rounded-lg border border-slate-700 transition group" title="Save Path">
                             <i class="fas fa-save text-slate-400 group-hover:text-white"></i>
                         </button>
                     </div>
                 </div>
-
-                <!-- Password Input -->
                 <div>
-                    <label class="block text-xs uppercase text-slate-500 font-bold mb-1">Client Password</label>
+                    <label class="block text-xs uppercase text-slate-500 font-bold mb-2">Client Access Password</label>
                     <div class="flex gap-2">
-                        <input type="text" id="clientPass" class="flex-1 bg-slate-950 border border-slate-700 rounded px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none transition" value="{{ config.password }}">
-                        <button onclick="updateConfig('password')" class="bg-slate-800 hover:bg-slate-700 px-3 py-2 rounded border border-slate-700 transition group">
+                        <input type="text" id="clientPass" class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-300 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 transition" value="{{ config.password }}">
+                        <button onclick="updateConfig('password')" class="bg-slate-800 hover:bg-slate-700 px-3 py-2 rounded-lg border border-slate-700 transition group">
                             <i class="fas fa-save text-slate-400 group-hover:text-white"></i>
                         </button>
                     </div>
@@ -86,98 +75,118 @@
             </div>
         </div>
 
-        <!-- Toggles Card -->
-        <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-6">
-            <h3 class="text-lg font-semibold mb-4 flex items-center gap-2"><i class="fas fa-toggle-on text-slate-400"></i> Live State</h3>
+        <!-- Live State Toggles Card -->
+        <div class="bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-xl p-6 shadow-xl">
+            <h3 class="text-lg font-semibold mb-6 flex items-center gap-2 text-white">
+                <i class="fas fa-toggle-on text-slate-400"></i> Live Controls
+            </h3>
 
             <div class="space-y-4">
-                <div class="flex justify-between items-center p-3 bg-slate-950 rounded-lg border border-slate-800">
+                <!-- RUNNING -->
+                <div class="flex justify-between items-center p-3 bg-slate-950/50 rounded-lg border border-slate-800/50 hover:border-slate-700 transition">
                     <div>
                         <div class="font-medium text-sm text-white">Server Online</div>
-                        <div class="text-xs text-slate-500">Allow client connections</div>
+                        <div class="text-[10px] text-slate-500">Master switch for client connections</div>
                     </div>
                     <label class="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" id="toggleRunning" class="sr-only peer" onchange="toggleState('is_running')">
-                        <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-600"></div>
+                        <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-600 shadow-inner"></div>
                     </label>
                 </div>
 
-                <div class="flex justify-between items-center p-3 bg-slate-950 rounded-lg border border-slate-800">
+                <!-- PAUSE -->
+                <div class="flex justify-between items-center p-3 bg-slate-950/50 rounded-lg border border-slate-800/50 hover:border-slate-700 transition">
                     <div>
                         <div class="font-medium text-sm text-white">Pause Access</div>
-                        <div class="text-xs text-slate-500">Blur client screen & block downloads</div>
+                        <div class="text-[10px] text-slate-500">Blurs client screen & blocks interaction</div>
                     </div>
                     <label class="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" id="togglePause" class="sr-only peer" onchange="toggleState('is_paused')">
-                        <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                        <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500 shadow-inner"></div>
                     </label>
                 </div>
 
-                <div class="flex justify-between items-center p-3 bg-slate-950 rounded-lg border border-slate-800">
+                <!-- APPROVAL -->
+                <div class="flex justify-between items-center p-3 bg-slate-950/50 rounded-lg border border-slate-800/50 hover:border-slate-700 transition">
                     <div>
                         <div class="font-medium text-sm text-white">Require Approval</div>
-                        <div class="text-xs text-slate-500">Admin must approve downloads</div>
+                        <div class="text-[10px] text-slate-500">Admin must approve every download</div>
                     </div>
                     <label class="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" id="toggleApproval" class="sr-only peer" onchange="toggleState('require_approval')">
-                        <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                        <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600 shadow-inner"></div>
+                    </label>
+                </div>
+
+                <div class="h-px bg-slate-800 my-4"></div>
+
+                <!-- ENABLE PREVIEWS -->
+                <div class="flex justify-between items-center p-3 bg-slate-950/50 rounded-lg border border-slate-800/50 hover:border-slate-700 transition">
+                    <div>
+                        <div class="font-medium text-sm text-white">Enable File Previews</div>
+                        <div class="text-[10px] text-slate-500">Allow inline viewing of media/text</div>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="togglePreviews" class="sr-only peer" onchange="toggleState('enable_previews')">
+                        <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500 shadow-inner"></div>
+                    </label>
+                </div>
+
+                <!-- PREVIEW BYPASS -->
+                <div class="flex justify-between items-center p-3 bg-slate-950/50 rounded-lg border border-slate-800/50 hover:border-slate-700 transition">
+                    <div>
+                        <div class="font-medium text-sm text-white">Preview Bypasses Approval</div>
+                        <div class="text-[10px] text-slate-500">Allow preview even if download is locked</div>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="togglePreviewBypass" class="sr-only peer" onchange="toggleState('preview_bypasses_approval')">
+                        <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-pink-500 shadow-inner"></div>
                     </label>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Pending Requests -->
-    <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-6">
-        <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+    <!-- Pending Requests Table -->
+    <div class="bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-xl p-6 shadow-xl">
+        <h3 class="text-lg font-semibold mb-4 flex items-center gap-2 text-white">
             <i class="fas fa-list-check text-slate-400"></i> Pending Approvals
-            <span id="pendingCount" class="ml-2 px-2 py-0.5 rounded text-xs bg-purple-500 text-white">0</span>
+            <span id="pendingCount" class="ml-2 px-2 py-0.5 rounded text-[10px] font-bold bg-purple-500 text-white shadow shadow-purple-500/50">0</span>
         </h3>
-
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto rounded-lg border border-slate-800">
             <table class="w-full text-sm text-left text-slate-400">
-                <thead class="text-xs text-slate-500 uppercase bg-slate-950/50">
+                <thead class="text-xs text-slate-500 uppercase bg-slate-950">
                 <tr>
-                    <th class="px-4 py-3">Time</th>
-                    <!-- This header now correctly reflects Request ID -->
-                    <th class="px-4 py-3">Request ID</th>
-                    <th class="px-4 py-3">File</th>
-                    <th class="px-4 py-3">Action</th>
+                    <th class="px-4 py-3 font-semibold">Time</th>
+                    <th class="px-4 py-3 font-semibold">Request ID</th>
+                    <th class="px-4 py-3 font-semibold">File Requested</th>
+                    <th class="px-4 py-3 font-semibold text-right">Action</th>
                 </tr>
                 </thead>
-                <tbody id="requestsTable" class="divide-y divide-slate-800">
-                <!-- Populated by JS -->
-                <tr class="text-center py-4"><td colspan="4" class="py-4">No pending requests</td></tr>
+                <tbody id="requestsTable" class="divide-y divide-slate-800 bg-slate-900/30">
+                <tr class="text-center py-4"><td colspan="4" class="py-6 italic">No pending requests</td></tr>
                 </tbody>
             </table>
         </div>
     </div>
-
 </main>
 
-<!-- CUSTOM LOGOUT CONFIRMATION MODAL -->
+<!-- Logout Confirmation Modal -->
 <div id="logoutConfirmModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
     <div class="bg-slate-900 border border-slate-700 p-8 rounded-2xl max-w-sm w-full text-center shadow-2xl transform scale-95 transition-transform duration-300" id="logoutConfirmContent">
-
-        <div class="w-16 h-16 mx-auto bg-red-500/10 text-red-500 rounded-full flex items-center justify-center mb-4 border border-red-500/20">
+        <div class="w-16 h-16 mx-auto bg-red-500/10 text-red-500 rounded-full flex items-center justify-center mb-4 border border-red-500/20 shadow-[0_0_15px_rgba(239,68,68,0.2)]">
             <i class="fas fa-exclamation-triangle text-2xl"></i>
         </div>
-
         <h3 class="text-lg font-bold text-white mb-2">Logout All Clients?</h3>
         <p class="text-slate-400 text-sm mb-6">This will immediately disconnect all active users. They will need to log in again.</p>
-
         <div class="flex gap-3 justify-center">
-            <button onclick="closeLogoutConfirm()" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium transition">
-                Cancel
-            </button>
-            <button onclick="performLogoutAll()" class="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white text-sm font-bold shadow-lg shadow-red-600/20 transition">
-                Yes, Logout All
-            </button>
+            <button onclick="closeLogoutConfirm()" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium transition border border-slate-700">Cancel</button>
+            <button onclick="performLogoutAll()" class="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white text-sm font-bold shadow-lg shadow-red-600/20 transition">Yes, Logout All</button>
         </div>
     </div>
 </div>
 
-<!-- NOTIFICATION TOAST -->
+<!-- Notification Toast -->
 <div id="notificationToast" class="fixed bottom-6 right-6 px-6 py-4 rounded-xl bg-slate-900 border border-emerald-500/30 shadow-2xl shadow-emerald-500/10 transform translate-y-20 opacity-0 transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1) flex items-center gap-4 z-50">
     <div class="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-400 border border-emerald-500/20">
         <i class="fas fa-check"></i>
@@ -188,7 +197,6 @@
     </div>
 </div>
 
-<!-- External JS -->
 <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
 </body>
 </html>

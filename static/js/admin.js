@@ -1,18 +1,19 @@
 /**
- * Timeout reference for the notification toast.
+ * Secure Share Admin Logic
+ * Handles real-time config updates, UI rendering, and request management.
  */
+
 let toastTimeout;
 
 /**
- * Displays a floating notification toast.
+ * Shows a toast notification.
  */
 function showNotification(message) {
     const toast = document.getElementById('notificationToast');
     const msgEl = document.getElementById('toastMessage');
-
     msgEl.innerText = message;
-    toast.classList.remove('translate-y-20', 'opacity-0');
 
+    toast.classList.remove('translate-y-20', 'opacity-0');
     if (toastTimeout) clearTimeout(toastTimeout);
 
     toastTimeout = setTimeout(() => {
@@ -21,17 +22,24 @@ function showNotification(message) {
 }
 
 /**
- * Fetches server status/config.
+ * Fetches current server configuration and updates the UI toggles.
  */
 function fetchState() {
     fetch('/admin/api/status')
         .then(response => response.json())
         .then(data => {
             const config = data.config;
+
+            // Sync Checkboxes
             document.getElementById('toggleRunning').checked = config.is_running;
             document.getElementById('togglePause').checked = config.is_paused;
             document.getElementById('toggleApproval').checked = config.require_approval;
 
+            // Sync New Preview Toggles
+            document.getElementById('togglePreviews').checked = config.enable_previews;
+            document.getElementById('togglePreviewBypass').checked = config.preview_bypasses_approval;
+
+            // Sync Header Status
             const indicator = document.getElementById('status-indicator');
             if (config.is_running) {
                 indicator.className = "px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
@@ -44,13 +52,16 @@ function fetchState() {
 }
 
 /**
- * Toggles config states.
+ * Sends a configuration update to the server.
  */
 function toggleState(key) {
     let checkboxId;
+    // Map config keys to HTML IDs
     if (key === 'is_running') checkboxId = 'toggleRunning';
     else if (key === 'is_paused') checkboxId = 'togglePause';
-    else checkboxId = 'toggleApproval';
+    else if (key === 'require_approval') checkboxId = 'toggleApproval';
+    else if (key === 'enable_previews') checkboxId = 'togglePreviews';
+    else if (key === 'preview_bypasses_approval') checkboxId = 'togglePreviewBypass';
 
     const value = document.getElementById(checkboxId).checked;
 
@@ -58,119 +69,98 @@ function toggleState(key) {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({[key]: value})
-    }).then(() => {
-        fetchState();
-    });
+    })
+        .then(() => fetchState()) // Re-fetch to ensure sync
+        .catch(() => showNotification("Connection Error"));
 }
 
 /**
- * Native File Picker.
+ * Opens Server-Side Folder Picker.
  */
 function openFilePicker() {
     const btn = event.currentTarget;
     btn.disabled = true;
-    btn.classList.add('opacity-50', 'cursor-not-allowed');
+    btn.classList.add('opacity-50');
 
     fetch('/admin/api/browse')
         .then(response => response.json())
         .then(data => {
             btn.disabled = false;
-            btn.classList.remove('opacity-50', 'cursor-not-allowed');
-
+            btn.classList.remove('opacity-50');
             if (data.path) {
                 document.getElementById('folderPath').value = data.path;
-                showNotification("Folder selected. Click Save to apply.");
+                showNotification("Path selected. Click save.");
             }
-        })
-        .catch(err => {
-            btn.disabled = false;
-            btn.classList.remove('opacity-50', 'cursor-not-allowed');
         });
 }
 
 /**
- * Saves text config.
+ * Updates text-based config (Path, Password).
  */
 function updateConfig(type) {
     const inputId = type === 'folder' ? 'folderPath' : 'clientPass';
     const configKey = type === 'folder' ? 'folder_path' : 'password';
-    const value = document.getElementById(inputId).value;
 
     fetch('/admin/api/status', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({[configKey]: value})
-    }).then(() => {
-        const msg = type === 'folder' ? 'Shared folder path updated.' : 'Access password updated.';
-        showNotification(msg);
-    });
+        body: JSON.stringify({[configKey]: document.getElementById(inputId).value})
+    }).then(() => showNotification("Configuration Saved."));
 }
 
-// --- Logout Modal Logic ---
-
+/**
+ * Logout Modal Logic
+ */
 function showLogoutConfirm() {
     const modal = document.getElementById('logoutConfirmModal');
     const content = document.getElementById('logoutConfirmContent');
     modal.classList.remove('opacity-0', 'pointer-events-none');
-    content.classList.remove('scale-95');
-    content.classList.add('scale-100');
+    content.classList.remove('scale-95'); content.classList.add('scale-100');
 }
-
 function closeLogoutConfirm() {
     const modal = document.getElementById('logoutConfirmModal');
     const content = document.getElementById('logoutConfirmContent');
     modal.classList.add('opacity-0', 'pointer-events-none');
-    content.classList.add('scale-95');
-    content.classList.remove('scale-100');
+    content.classList.add('scale-95'); content.classList.remove('scale-100');
 }
-
 function performLogoutAll() {
-    fetch('/admin/api/logout_all', { method: 'POST' })
-        .then(r => r.json())
-        .then(data => {
-            if (data.success) {
-                closeLogoutConfirm();
-                showNotification("All clients have been logged out.");
-            }
-        });
+    fetch('/admin/api/logout_all', { method: 'POST' }).then(r => r.json()).then(d => {
+        closeLogoutConfirm();
+        showNotification("All clients logged out.");
+    });
 }
-
-// --- Table Logic ---
 
 /**
- * Fetches requests and updates table using Request ID (req_id) for consistency.
+ * Request Table Logic
  */
 function fetchRequests() {
     fetch('/admin/api/requests')
         .then(response => response.json())
         .then(data => {
-            const tbody = document.getElementById('requestsTable');
-            const reqIds = Object.keys(data);
+            const ids = Object.keys(data);
+            document.getElementById('pendingCount').innerText = ids.length;
+            const tb = document.getElementById('requestsTable');
 
-            document.getElementById('pendingCount').innerText = reqIds.length;
-
-            if (reqIds.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" class="px-4 py-4 text-center italic text-slate-600">No pending requests</td></tr>';
+            if (!ids.length) {
+                tb.innerHTML = '<tr class="text-center py-4"><td colspan="4" class="py-6 italic text-slate-500">No pending requests</td></tr>';
                 return;
             }
 
-            tbody.innerHTML = reqIds.map(id => {
+            tb.innerHTML = ids.map(id => {
                 const req = data[id];
-                const timeStr = new Date(req.timestamp * 1000).toLocaleTimeString();
-                // Use the Request ID (first 8 chars) for display to match client view
-                const displayId = id.substring(0, 8);
-
+                const date = new Date(req.timestamp * 1000).toLocaleTimeString();
                 return `
-                    <tr class="bg-slate-900/20 hover:bg-slate-800/50 transition">
-                        <td class="px-4 py-3 font-mono text-xs">${timeStr}</td>
-                        <td class="px-4 py-3 font-mono text-xs text-cyan-400">ID: ${displayId}</td>
-                        <td class="px-4 py-3 text-white font-medium">${req.file}</td>
-                        <td class="px-4 py-3 flex gap-2">
-                            <button onclick="decide('${id}', 'approved')" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-xs transition">Approve</button>
-                            <button onclick="decide('${id}', 'rejected')" class="px-3 py-1 bg-red-600 hover:bg-red-500 text-white rounded text-xs transition">Reject</button>
-                        </td>
-                    </tr>
-                `;
+                <tr class="bg-slate-900/20 hover:bg-slate-800/50 transition border-b border-slate-800/50 last:border-0">
+                    <td class="px-4 py-3 font-mono text-xs text-slate-400">${date}</td>
+                    <td class="px-4 py-3 font-mono text-xs text-cyan-400">ID: ${id.substring(0, 8)}</td>
+                    <td class="px-4 py-3 text-white font-medium">${req.file}</td>
+                    <td class="px-4 py-3 text-right">
+                        <div class="flex justify-end gap-2">
+                            <button onclick="decide('${id}', 'approved')" class="px-3 py-1 bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-white border border-emerald-600/30 rounded text-xs transition font-bold">Approve</button>
+                            <button onclick="decide('${id}', 'rejected')" class="px-3 py-1 bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white border border-red-600/30 rounded text-xs transition font-bold">Reject</button>
+                        </div>
+                    </td>
+                </tr>`;
             }).join('');
         });
 }
@@ -186,7 +176,8 @@ function decide(reqId, decision) {
     });
 }
 
-setInterval(fetchState, 2000);
-setInterval(fetchRequests, 2000);
+// Start Loops
+setInterval(fetchState, 1500);
+setInterval(fetchRequests, 1500);
 fetchState();
 fetchRequests();

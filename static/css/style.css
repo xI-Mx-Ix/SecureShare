@@ -1,89 +1,28 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-/* Apply font globally */
 body {
     font-family: 'Inter', sans-serif;
 }
 
-/* Custom Scrollbar Styling */
+/* Custom Scrollbar for modern look */
 ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
 }
-
 ::-webkit-scrollbar-track {
-    background: #0f172a; /* matches bg-slate-950 */
+    background: #020617;
 }
-
 ::-webkit-scrollbar-thumb {
-    background: #334155; /* matches bg-slate-700 */
-    border-radius: 4px;
+    background: #334155;
+    border-radius: 3px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
-    background: #475569; /* matches bg-slate-600 */
+    background: #475569;
 }
 
-/*
-   Utility classes for blur transitions
-*/
+/* Blur Utility */
 .blur-sm {
     filter: blur(4px);
 }
 
-/*
-   File Card Enhancements
-   These styles support both Grid and List views
-*/
-.file-card {
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Hover effects for the cards */
-.file-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 30px -10px rgba(6, 182, 212, 0.15); /* cyan glow */
-    border-color: rgba(148, 163, 184, 0.2);
-}
-
-/* Specific styling for List View Layout */
-.list-view-row {
-    flex-direction: row;
-    align-items: center;
-    padding: 12px 20px;
-    min-height: 64px;
-    gap: 16px;
-    border-radius: 12px;
-}
-
-.list-view-row .icon-wrapper {
-    width: 42px;
-    height: 42px;
-    margin-bottom: 0;
-    font-size: 1.25rem;
-}
-
-.list-view-row .text-content {
-    flex: 1;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    text-align: left;
-}
-
-.list-view-row .action-btn {
-    width: auto;
-    margin-top: 0;
-    padding: 8px 16px;
-    margin-left: 16px;
-}
-
-/* Modal Animation */
-@keyframes modalPop {
-    0% { transform: scale(0.95); opacity: 0; }
-    100% { transform: scale(1); opacity: 1; }
-}
-
-#approvalContent {
-    animation: modalPop 0.3s ease-out forwards;
-}
+/* Tooltip group logic handled via Tailwind utilities in HTML */
